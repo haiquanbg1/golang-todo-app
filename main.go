@@ -14,8 +14,9 @@ import (
 )
 
 func main() {
-	// load config
+	// load config and connect database
 	cfg := config.Load()
+	config.Connect(cfg.DSN)
 
 	// config router
 	router := chi.NewRouter()
