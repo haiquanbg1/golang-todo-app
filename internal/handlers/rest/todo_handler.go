@@ -1,9 +1,9 @@
-package handlers
+package rest
 
 import (
 	"net/http"
 
-	"github.com/haiquanbg1/golang-todo-app/services"
+	"github.com/haiquanbg1/golang-todo-app/internal/services"
 )
 
 type TodoHandler struct {
