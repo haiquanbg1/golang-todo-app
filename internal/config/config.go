@@ -11,6 +11,7 @@ type AppConfig struct {
 	JWT_SECRET string
 	PORT       string
 	ENV        string
+	DSN        string
 }
 
 func Load() AppConfig {
@@ -25,10 +26,14 @@ func Load() AppConfig {
 
 	environment := getEnv("ENVIRONMENT", "development")
 
+	default_dsn := "root@tcp(127.0.0.1:3306)/todo_app?parseTime=true&loc=Local"
+	dsn := getEnv("DATABASE_DSN", default_dsn)
+
 	return AppConfig{
 		JWT_SECRET: secret,
 		PORT:       port,
 		ENV:        environment,
+		DSN:        dsn,
 	}
 }
 
