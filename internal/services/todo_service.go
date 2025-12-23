@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/haiquanbg1/golang-todo-app/repositories"
+	"github.com/haiquanbg1/golang-todo-app/internal/repositories"
 )
 
 type TodoService interface {

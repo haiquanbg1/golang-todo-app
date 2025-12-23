@@ -4,18 +4,19 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/haiquanbg1/golang-todo-app/config"
-	"github.com/haiquanbg1/golang-todo-app/handlers"
-	"github.com/haiquanbg1/golang-todo-app/repositories"
-	"github.com/haiquanbg1/golang-todo-app/services"
+	"github.com/haiquanbg1/golang-todo-app/internal/config"
+	handlers "github.com/haiquanbg1/golang-todo-app/internal/handlers/rest"
+	"github.com/haiquanbg1/golang-todo-app/internal/repositories"
+	"github.com/haiquanbg1/golang-todo-app/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	// load config
+	// load config and connect database
 	cfg := config.Load()
+	config.Connect(cfg.DSN)
 
 	// config router
 	router := chi.NewRouter()
