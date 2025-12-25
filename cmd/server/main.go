@@ -17,7 +17,11 @@ import (
 func main() {
 	// load config and connect, migrate database
 	cfg := config.Load()
-	utils.Connect(cfg.DSN)
+	_, err := utils.Connect(cfg.DSN)
+
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 
 	// config router
 	router := chi.NewRouter()
