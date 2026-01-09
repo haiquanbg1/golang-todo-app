@@ -8,15 +8,20 @@ import (
 	handlers "github.com/haiquanbg1/golang-todo-app/internal/handlers/rest"
 	"github.com/haiquanbg1/golang-todo-app/internal/repositories"
 	"github.com/haiquanbg1/golang-todo-app/internal/services"
+	"github.com/haiquanbg1/golang-todo-app/internal/utils"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	// load config and connect database
+	// load config and connect, migrate database
 	cfg := config.Load()
-	config.Connect(cfg.DSN)
+	_, err := utils.Connect(cfg.DSN)
+
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 
 	// config router
 	router := chi.NewRouter()
