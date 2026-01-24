@@ -1,14 +1,13 @@
 package repositories
 
 import (
-	"fmt"
-
+	"github.com/haiquanbg1/golang-todo-app/internal/errors"
 	"github.com/haiquanbg1/golang-todo-app/internal/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	FindById(id int) (*models.User, error)
+	FindById(id uint) (*models.User, error)
 	FindByUsername(username string) (*models.User, error)
 	Create(user *models.User) error
 }
@@ -23,34 +22,33 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	}
 }
 
-func (repo *userRepository) FindById(id int) (*models.User, error) {
-	var user models.User
+func (repo *userRepository) FindById(id uint) (*models.User, error) {
+	var user *models.User
 
 	err := repo.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("User not found.")
+			return nil, errors.ErrRecordNotFound
 		}
 
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (repo *userRepository) FindByUsername(username string) (*models.User, error) {
-	var user models.User
-
+	var user *models.User
 	err := repo.db.Where("username = ?", username).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("User not found.")
+			return nil, errors.ErrRecordNotFound
 		}
 
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (repo *userRepository) Create(user *models.User) error {

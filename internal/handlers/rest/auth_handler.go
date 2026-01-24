@@ -49,6 +49,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, req *http.Request) {
 		Value:    accessToken,
 		MaxAge:   handler.accessTokenExpiry,
 		HttpOnly: true,
+		Path:     "/",
 	})
 
 	http.SetCookie(w, &http.Cookie{
@@ -56,6 +57,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, req *http.Request) {
 		Value:    refreshToken,
 		MaxAge:   handler.refreshTokenExpiry,
 		HttpOnly: true,
+		Path:     "/",
 	})
 
 	utils.WriteResponse(w, http.StatusOK, map[string]string{"message": "Login successful"})

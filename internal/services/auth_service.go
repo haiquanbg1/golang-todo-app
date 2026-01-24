@@ -51,9 +51,9 @@ func (service *authService) Login(username string, password string) (string, str
 }
 
 func (service *authService) Register(username string, password string) error {
-	user, err := service.userRepo.FindByUsername(username)
-	if err != nil {
-		return err
+	user, _ := service.userRepo.FindByUsername(username)
+	if user != nil {
+		return fmt.Errorf("Username already exists.")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
