@@ -39,7 +39,7 @@ func (service *todoService) FindById(id uint, userId uint) (*models.Todo, error)
 		return nil, errors.ErrForbidden
 	}
 
-	return service.repo.FindById(id)
+	return todo, nil
 }
 
 func (service *todoService) Create(todo *models.Todo, userId uint) error {

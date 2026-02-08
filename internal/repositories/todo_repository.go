@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 
 	"github.com/haiquanbg1/golang-todo-app/internal/constants"
@@ -31,7 +29,6 @@ func NewTodoRepository(db *gorm.DB) TodoRepository {
 func (repo *todoRepository) FindByUser(status constants.TodoStatus, userId uint, limit int, offset int) ([]*models.Todo, error) {
 	var todos []*models.Todo
 
-	fmt.Println(userId)
 	query := repo.db.Where("user_id = ?", userId)
 	if status != "" {
 		query = query.Where("status = ?", status)

@@ -145,6 +145,9 @@ func (handler *TodoHandler) Update(w http.ResponseWriter, req *http.Request) {
 		case errors.ErrForbidden:
 			utils.WriteError(w, http.StatusForbidden, "Access denied")
 			return
+		case errors.ErrRecordNotFound:
+			utils.WriteError(w, http.StatusNotFound, "Todo not found")
+			return
 		default:
 			utils.WriteError(w, http.StatusInternalServerError, err.Error())
 		}
