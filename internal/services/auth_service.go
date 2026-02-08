@@ -12,6 +12,7 @@ import (
 type AuthService interface {
 	Login(username string, password string) (string, string, error)
 	Register(username string, password string) error
+	RefreshToken(refreshToken string) (string, error)
 }
 
 type authService struct {
@@ -51,9 +52,9 @@ func (service *authService) Login(username string, password string) (string, str
 }
 
 func (service *authService) Register(username string, password string) error {
-	user, err := service.userRepo.FindByUsername(username)
-	if err != nil {
-		return err
+	user, _ := service.userRepo.FindByUsername(username)
+	if user != nil {
+		return fmt.Errorf("Username already exists.")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -67,4 +68,26 @@ func (service *authService) Register(username string, password string) error {
 	}
 
 	return service.userRepo.Create(user)
+}
+
+func (service *authService) RefreshToken(refreshToken string) (string, error) {
+	// Parse and validate the refresh token
+	userID, err := service.jwt.ParseRefreshToken(refreshToken)
+	if err != nil {
+		return "", fmt.Errorf("Invalid refresh token")
+	}
+
+	// Verify user still exists
+	user, err := service.userRepo.FindById(userID)
+	if err != nil {
+		return "", err
+	}
+
+	// Generate new access token
+	accessToken, err := service.jwt.GenerateAccessToken(user.ID)
+	if err != nil {
+		return "", fmt.Errorf("Failed to generate access token")
+	}
+
+	return accessToken, nil
 }

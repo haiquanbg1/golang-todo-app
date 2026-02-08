@@ -45,7 +45,7 @@ func (j *JWT) GenerateRefreshToken(userID uint) (string, error) {
 
 func (j *JWT) Parse(tokenStr string, expectType string) (uint, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok || token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
 		return j.secret, nil
@@ -69,12 +69,12 @@ func (j *JWT) Parse(tokenStr string, expectType string) (uint, error) {
 		return 0, fmt.Errorf("token type mismatch: expected %s", expectType)
 	}
 
-	userIDFloat, ok := claims["user_id"].(float64)
+	userId, ok := claims["user_id"].(float64)
 	if !ok {
 		return 0, fmt.Errorf("user_id not found or invalid")
 	}
 
-	return uint(userIDFloat), nil
+	return uint(userId), nil
 }
 
 func (j *JWT) ParseAccessToken(tokenStr string) (uint, error) {

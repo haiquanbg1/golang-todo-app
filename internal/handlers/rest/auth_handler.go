@@ -40,7 +40,13 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, req *http.Request) {
 
 	accessToken, refreshToken, err := handler.authService.Login(input.Username, input.Password)
 	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, err.Error())
+		switch err {
+		case fmt.Errorf("Wrong password."):
+			utils.WriteError(w, http.StatusUnauthorized, err.Error())
+			return
+		default:
+			utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -49,6 +55,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, req *http.Request) {
 		Value:    accessToken,
 		MaxAge:   handler.accessTokenExpiry,
 		HttpOnly: true,
+		Path:     "/",
 	})
 
 	http.SetCookie(w, &http.Cookie{
@@ -56,6 +63,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, req *http.Request) {
 		Value:    refreshToken,
 		MaxAge:   handler.refreshTokenExpiry,
 		HttpOnly: true,
+		Path:     "/",
 	})
 
 	utils.WriteResponse(w, http.StatusOK, map[string]string{"message": "Login successful"})
@@ -79,11 +87,47 @@ func (handler *AuthHandler) Register(w http.ResponseWriter, req *http.Request) {
 
 	err := handler.authService.Register(input.Username, input.Password)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err.Error())
+		switch err {
+		case fmt.Errorf("Username already exists."):
+			utils.WriteError(w, http.StatusConflict, err.Error())
+			return
+		default:
+			utils.WriteError(w, http.StatusBadRequest, err.Error())
+		}
 		return
 	}
 
 	utils.WriteResponse(w, http.StatusOK, map[string]string{"message": "Registration successful. Please log in."})
+}
+
+func (handler *AuthHandler) RefreshToken(w http.ResponseWriter, req *http.Request) {
+	cookie, err := req.Cookie("refreshToken")
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Refresh token not found")
+		return
+	}
+
+	refreshToken := cookie.Value
+	if refreshToken == "" {
+		utils.WriteError(w, http.StatusUnauthorized, "Refresh token is empty")
+		return
+	}
+
+	accessToken, err := handler.authService.RefreshToken(refreshToken)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "accessToken",
+		Value:    accessToken,
+		MaxAge:   handler.accessTokenExpiry,
+		HttpOnly: true,
+		Path:     "/",
+	})
+
+	utils.WriteResponse(w, http.StatusOK, map[string]string{"message": "Token refreshed successfully"})
 }
 
 func validateCredentials(username, password string) error {
